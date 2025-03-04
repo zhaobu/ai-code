@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "game"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <youremail@example.com>"]
+readme = "README.md"
+packages = [{include = "snake_game.py"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pygame = "^2.5.2"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.0"
+black = "^24.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
