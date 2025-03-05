@@ -133,6 +133,12 @@ def main():
                     elif num == 5:  # 选择退出选项
                         selected = current_page_options
                 elif event.key == pygame.K_RETURN:
+                    # 检查是否选择了退出选项
+                    current_page_options = min(items_per_page, len(options) - current_page * items_per_page)
+                    if selected == current_page_options:  # 如果选中了退出选项
+                        running = False
+                        continue
+                    
                     game_index = current_page * items_per_page + selected
                     if game_index < len(options):
                         if game_index == 0:
