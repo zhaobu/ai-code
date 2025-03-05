@@ -6,18 +6,19 @@ from src.common.colors import *
 def draw_menu(screen, selected):
     """绘制游戏选择菜单"""
     screen.fill(BACKGROUND)
-    font = pygame.font.Font("C:/Windows/Fonts/msyh.ttc", 48)
+    title_font = pygame.font.Font("C:/Windows/Fonts/msyh.ttc", 36)
+    menu_font = pygame.font.Font("C:/Windows/Fonts/msyh.ttc", 28)
     
     # 绘制标题
-    title = font.render("游戏合集", True, WHITE)
-    screen.blit(title, (100, 50))
+    title = title_font.render("游戏合集", True, WHITE)
+    screen.blit(title, (screen.get_width()//2 - title.get_width()//2, 50))
     
     # 绘制菜单项
     options = ["1. 俄罗斯方块", "2. 贪吃蛇", "3. 退出"]
     for i, option in enumerate(options):
         color = WHITE if i != selected else RED
-        text = font.render(option, True, color)
-        screen.blit(text, (100, 150 + i * 60))
+        text = menu_font.render(option, True, color)
+        screen.blit(text, (screen.get_width()//2 - text.get_width()//2, 150 + i * 50))
     
     pygame.display.flip()
 
@@ -28,7 +29,7 @@ def main():
         print(f"Pygame初始化失败，错误数：{init_result[1]}")
         return
         
-    screen = pygame.display.set_mode((400, 400))
+    screen = pygame.display.set_mode((600, 500))
     pygame.display.set_caption("游戏合集")
     clock = pygame.time.Clock()
     

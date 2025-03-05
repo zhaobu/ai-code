@@ -115,7 +115,6 @@ class TetrisGame:
                     grid_x = self.current_pos[0] + x
                     grid_y = self.current_pos[1] + y
                     if grid_y >= 0:
-                        # 确保写入颜色到网格时使用正确的坐标
                         try:
                             self.grid[grid_y][grid_x] = self.current_shape.color
                         except IndexError:
@@ -130,49 +129,11 @@ class TetrisGame:
             self._check_game_over(self.current_shape.get_shape())
             if self.game_over:
                 self.current_shape = None
+                return  # 确保在游戏结束时不继续执行
     def run(self):
         while not self.game_over:
             self.screen.fill(BLACK)
             
-            # 显示游戏结束提示
-            while self.game_over:
-                self.screen.fill(BLACK)
-                if not hasattr(self, 'game_over_time'):
-                    self.game_over_time = pygame.time.get_ticks()
-                # 渲染得分和按钮
-                font = pygame.font.Font("C:/Windows/Fonts/msyh.ttc", 48)
-                text = font.render(f'最终得分: {self.score}', True, WHITE)
-                restart_text = font.render('按 R 重新开始', True, WHITE)
-                menu_text = font.render('按 ESC 返回菜单', True, WHITE)
-                
-                # 居中显示所有元素
-                self.screen.blit(text, (self.screen_width//2 - text.get_width()//2, self.screen_height//2 - 80))
-                self.screen.blit(restart_text, (self.screen_width//2 - restart_text.get_width()//2, self.screen_height//2))
-                self.screen.blit(menu_text, (self.screen_width//2 - menu_text.get_width()//2, self.screen_height//2 + 60))
-                pygame.display.flip()
-                
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        return
-                    if event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_r:
-                            self.__init__(self.width, self.height, self.block_size)
-                            self.run()
-                            return
-                        elif event.key == pygame.K_ESCAPE:
-                            return
-                
-                for event in pygame.event.get():
-                    if event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_ESCAPE:
-                            self.game_over = False
-                            return
-                        elif event.key == pygame.K_r:  # 重新开始游戏
-                            self.__init__(self.width, self.height, self.block_size)
-                            self.game_over = False
-                            self.run()
-                            return
-                continue
             # 处理事件
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -246,3 +207,35 @@ class TetrisGame:
             
             pygame.display.flip()
             self.clock.tick(60)
+        # 游戏结束处理
+        while True:
+            self.screen.fill(BLACK)
+            font = pygame.font.Font("C:/Windows/Fonts/msyh.ttc", 36)  # 调整字体大小
+            text = font.render(f'最终得分: {self.score}', True, WHITE)
+            restart_text = font.render('按 R 重新开始', True, WHITE)
+            menu_text = font.render('按 ESC 返回菜单', True, WHITE)
+            
+            # 居中显示文本
+            text_rect = text.get_rect(center=(self.screen_width//2, self.screen_height//2 - 60))
+            restart_rect = restart_text.get_rect(center=(self.screen_width//2, self.screen_height//2))
+            menu_rect = menu_text.get_rect(center=(self.screen_width//2, self.screen_height//2 + 60))
+            
+            self.screen.blit(text, text_rect)
+            self.screen.blit(restart_text, restart_rect)
+            self.screen.blit(menu_text, menu_rect)
+            
+            pygame.display.flip()
+            
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    return
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_r:
+                        self.__init__(self.width, self.height, self.block_size)
+                        self.run()
+                        return
+                    elif event.key == pygame.K_ESCAPE:
+                        # 重置窗口大小和标题
+                        pygame.display.set_mode((600, 500))
+                        pygame.display.set_caption("游戏合集")
+                        return

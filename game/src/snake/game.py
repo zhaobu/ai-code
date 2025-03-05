@@ -68,8 +68,10 @@ class SnakeGame:
                     elif event.key == pygame.K_RIGHT and self.direction != (-1, 0):
                         self.direction = (1, 0)
                     elif event.key == pygame.K_ESCAPE:  # 添加返回菜单功能
+                        # 重置窗口大小和标题
+                        pygame.display.set_mode((600, 500))
+                        pygame.display.set_caption("游戏合集")
                         return
-            
             # 更新游戏状态
             self.update()
             
@@ -117,6 +119,9 @@ class SnakeGame:
                         self.run()
                         return
                     elif event.key == pygame.K_ESCAPE:
+                        # 重置窗口大小和标题
+                        pygame.display.set_mode((600, 500))
+                        pygame.display.set_caption("游戏合集")
                         return
 
     def update(self) -> None:
