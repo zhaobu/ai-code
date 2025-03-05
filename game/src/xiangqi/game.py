@@ -10,12 +10,21 @@ class XiangqiGame:
         self.board_height = 10
         self.block_size = block_size
         self.margin = 50  # 棋盘边距
-        self.screen_width = self.board_width * block_size + 2 * self.margin
-        self.screen_height = self.board_height * block_size + 2 * self.margin
+        self.history_area_width = 200  # 走子记录区域宽度
+        self.screen_width = self.board_width * block_size + 2 * self.margin + self.history_area_width
+        self.screen_height = self.board_height * block_size + 2 * self.margin + 100  # 增加高度以显示模式选择按钮
         self.game_over = False
         self.is_red_turn = True  # True表示红方回合
         self.winner = None
         self.selected_piece = None
+        self.game_started = False  # 是否已经选择游戏模式
+        self.vs_ai = False  # 是否是人机对战模式
+        self.ai_difficulty = 'normal'  # AI难度
+        self.ai = None  # AI实例
+        self.moves_history = []  # 记录走子历史
+        self.scroll_offset = 0  # 添加滚动偏移量
+        self.history_surface = None  # 缓存历史记录surface
+        self.history_needs_update = True  # 标记是否需要更新历史记录
         
         # 初始化棋盘和棋子
         self.board = [[None for _ in range(self.board_width)] for _ in range(self.board_height)]
@@ -290,6 +299,20 @@ class XiangqiGame:
                                self.board_height * self.block_size + 10)
         pygame.draw.rect(self.screen, (210, 180, 140), board_rect)  # 实木色调
         
+        # 绘制走子记录区域
+        history_area_x = self.margin + self.board_width * self.block_size + self.margin
+        history_area_y = self.margin
+        history_area = pygame.Rect(history_area_x, history_area_y,
+                                 self.history_area_width, self.screen_height - 2 * self.margin)
+        pygame.draw.rect(self.screen, (245, 245, 245), history_area)
+        pygame.draw.rect(self.screen, (180, 180, 180), history_area, 2)
+        
+        # 绘制走子记录标题
+        font = pygame.font.Font("C:/Windows/Fonts/msyh.ttc", 24)
+        title = font.render("走子记录", True, BLACK)
+        title_rect = title.get_rect(center=(history_area_x + self.history_area_width//2, history_area_y + 20))
+        self.screen.blit(title, title_rect)
+        
         # 绘制棋盘网格
         for x in range(self.board_width):
             pygame.draw.line(self.screen, BLACK,
@@ -356,78 +379,294 @@ class XiangqiGame:
                     if self.selected_piece == (x, y):
                         pygame.draw.circle(self.screen, YELLOW, pos, radius, 3)
     
+    def _get_move_text(self, from_pos: Tuple[int, int], to_pos: Tuple[int, int], piece: Dict) -> str:
+        """生成走子记录的文本"""
+        from_x, from_y = from_pos
+        to_x, to_y = to_pos
+        piece_type = piece['type']
+        is_red = piece['color'] == 'red'
+        
+        # 中文数字映射
+        numbers = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十']
+        
+        # 棋子类型映射
+        piece_names = {
+            'general': '帅' if is_red else '将',
+            'advisor': '仕' if is_red else '士',
+            'elephant': '相' if is_red else '象',
+            'horse': '马',
+            'chariot': '车',
+            'cannon': '炮',
+            'soldier': '兵' if is_red else '卒'
+        }
+        
+        # 获取棋子名称
+        piece_name = piece_names[piece_type]
+        
+        # 计算列号（从右到左）
+        from_col = 9 - from_x if is_red else from_x + 1
+        to_col = 9 - to_x if is_red else to_x + 1
+        
+        # 判断移动方向
+        if from_x == to_x:
+            direction = '进' if (is_red and to_y < from_y) or (not is_red and to_y > from_y) else '退'
+            steps = abs(from_y - to_y)
+            return f'{piece_name}{numbers[from_col]}{direction}{numbers[steps]}'
+        else:
+            direction = '平'
+            return f'{piece_name}{numbers[from_col]}{direction}{numbers[to_col]}'
+
+    def _draw_moves_history(self):
+        """绘制走子历史记录"""
+        if not self.moves_history:
+            return
+            
+        # 设置记录区域
+        history_area_x = self.margin + self.board_width * self.block_size + self.margin
+        history_area_y = self.margin
+        line_height = 25
+        max_visible_lines = (self.screen_height - 2 * self.margin - 50) // line_height
+        total_height = len(self.moves_history) * line_height
+        
+        # 处理鼠标滚轮事件
+        for event in pygame.event.get(pygame.MOUSEWHEEL):
+            if event.y != 0:  # 滚轮移动
+                mouse_pos = pygame.mouse.get_pos()
+                # 检查鼠标是否在历史记录区域内
+                if (history_area_x <= mouse_pos[0] <= history_area_x + self.history_area_width and
+                    history_area_y <= mouse_pos[1] <= history_area_y + self.screen_height - 2 * self.margin):
+                    self.scroll_offset = max(0, min(self.scroll_offset - event.y * 20,
+                                                  max(0, total_height - max_visible_lines * line_height)))
+                    self.history_needs_update = True
+        
+        # 如果需要更新历史记录
+        if self.history_needs_update or self.history_surface is None:
+            # 创建一个临时surface来绘制记录
+            self.history_surface = pygame.Surface((self.history_area_width, max(total_height, self.screen_height - 2 * self.margin)))
+            self.history_surface.fill((245, 245, 245))
+            
+            font = pygame.font.Font("C:/Windows/Fonts/msyh.ttc", 18)
+            
+            # 绘制所有记录
+            for i, move in enumerate(self.moves_history):
+                color = RED if i % 2 == 0 else BLACK
+                text = font.render(f"{i//2 + 1}. {move}", True, color)
+                text_rect = text.get_rect(x=10, y=i * line_height)
+                self.history_surface.blit(text, text_rect)
+            
+            self.history_needs_update = False
+        
+        # 绘制记录区域边框
+        pygame.draw.rect(self.screen, (245, 245, 245), pygame.Rect(history_area_x, history_area_y,
+                                                                  self.history_area_width, self.screen_height - 2 * self.margin))
+        pygame.draw.rect(self.screen, (180, 180, 180), pygame.Rect(history_area_x, history_area_y,
+                                                                  self.history_area_width, self.screen_height - 2 * self.margin), 2)
+        
+        # 绘制标题
+        title_font = pygame.font.Font("C:/Windows/Fonts/msyh.ttc", 24)
+        title = title_font.render("走子记录", True, BLACK)
+        title_rect = title.get_rect(center=(history_area_x + self.history_area_width//2, history_area_y + 20))
+        self.screen.blit(title, title_rect)
+        
+        # 创建一个裁剪区域
+        clip_rect = pygame.Rect(history_area_x, history_area_y + 50,
+                               self.history_area_width, self.screen_height - 2 * self.margin - 50)
+        self.screen.set_clip(clip_rect)
+        
+        # 将记录surface绘制到屏幕上，考虑滚动偏移量
+        start_y = history_area_y + 50 - self.scroll_offset
+        self.screen.blit(self.history_surface, (history_area_x, start_y))
+        
+        # 重置裁剪区域
+        self.screen.set_clip(None)
+        
+        # 如果记录超出显示区域，绘制滚动条
+        if total_height > (self.screen_height - 2 * self.margin - 50):
+            scroll_area_height = self.screen_height - 2 * self.margin - 50
+            scroll_height = max(30, scroll_area_height * max_visible_lines * line_height / total_height)
+            scroll_pos = scroll_area_height * self.scroll_offset / (total_height - max_visible_lines * line_height)
+            pygame.draw.rect(self.screen, (200, 200, 200),
+                           (history_area_x + self.history_area_width - 10,
+                            history_area_y + 50 + scroll_pos,
+                            8, scroll_height))
+
+
     def run(self):
+        # 导入AI模块
+        from src.xiangqi.ai import XiangqiAI
+        
+        # 游戏模式选择界面
+        selected_mode = 0  # 0: 双人对战, 1: 人机对战
+        while not self.game_started:
+            self.screen.fill((240, 240, 240))
+            font = pygame.font.Font("C:/Windows/Fonts/msyh.ttc", 48)
+            title = font.render("中国象棋", True, BLACK)
+            title_rect = title.get_rect(center=(self.screen_width//2, 100))
+            self.screen.blit(title, title_rect)
+            
+            # 创建按钮
+            font = pygame.font.Font("C:/Windows/Fonts/msyh.ttc", 36)
+            pvp_text = font.render("双人对战", True, BLACK)
+            pve_text = font.render("人机对战", True, BLACK)
+            pvp_rect = pvp_text.get_rect(center=(self.screen_width//2, 200))
+            pve_rect = pve_text.get_rect(center=(self.screen_width//2, 300))
+            
+            # 绘制按钮
+            pvp_color = YELLOW if selected_mode == 0 else (200, 200, 200)
+            pve_color = YELLOW if selected_mode == 1 else (200, 200, 200)
+            pygame.draw.rect(self.screen, pvp_color, pvp_rect.inflate(40, 20))
+            pygame.draw.rect(self.screen, pve_color, pve_rect.inflate(40, 20))
+            self.screen.blit(pvp_text, pvp_rect)
+            self.screen.blit(pve_text, pve_rect)
+            
+            # 如果选择了人机对战，显示难度选择
+            if self.vs_ai:
+                difficulties = [('简单', 'easy'), ('中等', 'normal'), ('困难', 'hard')]
+                self.selected_difficulty = 0 if not hasattr(self, 'selected_difficulty') else self.selected_difficulty
+                
+                for i, (text, _) in enumerate(difficulties):
+                    diff_text = font.render(text, True, BLACK)
+                    diff_rect = diff_text.get_rect(center=(self.screen_width//2, 400 + i*60))
+                    color = YELLOW if i == self.selected_difficulty else (200, 200, 200)
+                    pygame.draw.rect(self.screen, color, diff_rect.inflate(40, 20))
+                    self.screen.blit(diff_text, diff_rect)
+            
+            pygame.display.flip()
+            
+            # 处理事件
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    return
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    mouse_pos = pygame.mouse.get_pos()
+                    if pvp_rect.inflate(40, 20).collidepoint(mouse_pos):
+                        self.vs_ai = False
+                        self.game_started = True
+                    elif pve_rect.inflate(40, 20).collidepoint(mouse_pos):
+                        self.vs_ai = True
+                        selected_mode = 1
+                        if not self.ai:
+                            self.ai = XiangqiAI(self.ai_difficulty)
+                    elif self.vs_ai:
+                        for i, (_, diff) in enumerate(difficulties):
+                            diff_rect = pygame.Rect(self.screen_width//2 - 70, 400 + i*60 - 15, 140, 40)
+                            if diff_rect.collidepoint(mouse_pos):
+                                self.selected_difficulty = i
+                                self.ai_difficulty = difficulties[i][1]
+                                self.ai = XiangqiAI(self.ai_difficulty)
+                                self.game_started = True
+                elif event.type == pygame.KEYDOWN:
+                    if not self.vs_ai:
+                        if event.key == pygame.K_UP or event.key == pygame.K_DOWN:
+                            selected_mode = (selected_mode + 1) % 2
+                            if selected_mode == 1:
+                                self.vs_ai = True
+                            else:
+                                self.vs_ai = False
+                        elif event.key == pygame.K_RETURN:
+                            if selected_mode == 0:
+                                self.game_started = True
+                            else:
+                                self.vs_ai = True
+                    elif self.vs_ai:
+                        if event.key == pygame.K_UP:
+                            self.selected_difficulty = (self.selected_difficulty - 1) % 3
+                            self.ai_difficulty = difficulties[self.selected_difficulty][1]
+                        elif event.key == pygame.K_DOWN:
+                            self.selected_difficulty = (self.selected_difficulty + 1) % 3
+                            self.ai_difficulty = difficulties[self.selected_difficulty][1]
+                        elif event.key == pygame.K_RETURN:
+                            self.ai = XiangqiAI(self.ai_difficulty)
+                            self.game_started = True
+                        elif event.key == pygame.K_ESCAPE:
+                            self.vs_ai = False
+                            selected_mode = 0
+                    elif event.key == pygame.K_ESCAPE:
+                        pygame.display.set_mode((600, 500))
+                        pygame.display.set_caption("游戏合集")
+                        return
+        
+        # 主游戏循环
         while True:
             self._draw_board()
             self._draw_pieces()
+            self._draw_moves_history()
+            
+            # 如果是AI回合
+            if self.vs_ai and not self.is_red_turn and not self.game_over:
+                ai_move = self.ai.make_move(self.board, self.is_red_turn)
+                if ai_move:
+                    from_pos, to_pos = ai_move
+                    from_x, from_y = from_pos
+                    to_x, to_y = to_pos
+                    
+                    # 记录走子
+                    piece = self.board[from_y][from_x]
+                    move_text = self._get_move_text((from_x, from_y), (to_x, to_y), piece)
+                    self.moves_history.append(move_text)
+                    self.history_needs_update = True
+                    
+                    # 执行移动
+                    self.board[to_y][to_x] = self.board[from_y][from_x]
+                    self.board[from_y][from_x] = None
+                    self.is_red_turn = not self.is_red_turn
+                    
+                    # 检查胜利条件
+                    self._check_win()
+            
+            pygame.display.flip()
             
             # 处理事件
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     return
                 elif event.type == pygame.MOUSEBUTTONDOWN and not self.game_over:
-                    pos = self._get_board_pos(event.pos)
-                    if pos:
-                        x, y = pos
-                        # 如果已经选中了一个棋子
-                        if self.selected_piece is not None:
-                            from_x, from_y = self.selected_piece
-                            # 如果点击的是同一个位置，取消选择
-                            if (x, y) == self.selected_piece:
-                                self.selected_piece = None
-                            # 如果点击的是另一个己方棋子，更新选择
-                            elif self.board[y][x] is not None and self.board[y][x]['color'] == ('red' if self.is_red_turn else 'black'):
-                                self.selected_piece = (x, y)
-                            # 如果是有效移动
-                            elif self._is_valid_move(self.selected_piece, (x, y)):
-                                # 移动棋子
-                                self.board[y][x] = self.board[from_y][from_x]
-                                self.board[from_y][from_x] = None
-                                self.selected_piece = None
-                                
-                                # 检查胜利条件
-                                if self._check_win():
-                                    self.game_over = True
-                                
-                                # 切换回合
-                                self.is_red_turn = not self.is_red_turn
-                        # 如果没有选中棋子，且点击的是己方棋子
-                        elif self.board[y][x] is not None and self.board[y][x]['color'] == ('red' if self.is_red_turn else 'black'):
-                            self.selected_piece = (x, y)
+                    if event.button == 1:  # 左键点击
+                        mouse_pos = pygame.mouse.get_pos()
+                        board_pos = self._get_board_pos(mouse_pos)
+                        
+                        if board_pos:
+                            x, y = board_pos
+                            if self.selected_piece:
+                                # 如果已经选择了棋子，尝试移动
+                                from_x, from_y = self.selected_piece
+                                if self._is_valid_move((from_x, from_y), (x, y)):
+                                    # 记录走子
+                                    piece = self.board[from_y][from_x]
+                                    move_text = self._get_move_text((from_x, from_y), (x, y), piece)
+                                    self.moves_history.append(move_text)
+                                    self.history_needs_update = True
+                                    
+                                    # 执行移动
+                                    self.board[y][x] = self.board[from_y][from_x]
+                                    self.board[from_y][from_x] = None
+                                    self.selected_piece = None
+                                    self.is_red_turn = not self.is_red_turn
+                                    
+                                    # 检查胜利条件
+                                    self._check_win()
+                                else:
+                                    # 如果移动不合法，取消选择
+                                    self.selected_piece = None
+                            else:
+                                # 选择新棋子
+                                piece = self.board[y][x]
+                                if piece and ((piece['color'] == 'red' and self.is_red_turn) or 
+                                            (piece['color'] == 'black' and not self.is_red_turn)):
+                                    self.selected_piece = (x, y)
+                    elif event.button == 3:  # 右键点击
+                        self.selected_piece = None
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 4:  # 滚轮向上
+                    self.scroll_offset = max(0, self.scroll_offset - 30)
+                    self.history_needs_update = True
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 5:  # 滚轮向下
+                    max_scroll = max(0, len(self.moves_history) * 30 - (self.screen_height - 2 * self.margin - 50))
+                    self.scroll_offset = min(max_scroll, self.scroll_offset + 30)
+                    self.history_needs_update = True
                 elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_r:
-                        self.__init__(self.block_size)
-                        continue
-                    elif event.key == pygame.K_ESCAPE:
+                    if event.key == pygame.K_ESCAPE:
                         pygame.display.set_mode((600, 500))
                         pygame.display.set_caption("游戏合集")
                         return
             
-            # 游戏结束显示
-            if self.game_over:
-                # 创建半透明背景
-                overlay = pygame.Surface((self.screen_width, self.screen_height))
-                overlay.fill((0, 0, 0))
-                overlay.set_alpha(128)
-                self.screen.blit(overlay, (0, 0))
-                
-                font = pygame.font.Font("C:/Windows/Fonts/msyh.ttc", 56)
-                if self.winner == 'red':
-                    text = font.render("红方胜利！", True, (255, 215, 0))  # 金色
-                else:
-                    text = font.render("黑方胜利！", True, (255, 215, 0))  # 金色
-                
-                font_small = pygame.font.Font("C:/Windows/Fonts/msyh.ttc", 36)
-                restart_text = font_small.render("按R重新开始", True, (255, 255, 255))
-                menu_text = font_small.render("按ESC返回菜单", True, (255, 255, 255))
-                
-                text_rect = text.get_rect(center=(self.screen_width//2, self.screen_height//2 - 60))
-                restart_rect = restart_text.get_rect(center=(self.screen_width//2, self.screen_height//2))
-                menu_rect = menu_text.get_rect(center=(self.screen_width//2, self.screen_height//2 + 60))
-                
-                self.screen.blit(text, text_rect)
-                self.screen.blit(restart_text, restart_rect)
-                self.screen.blit(menu_text, menu_rect)
-            
-            pygame.display.flip()
             self.clock.tick(60)
