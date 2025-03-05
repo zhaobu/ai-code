@@ -7,6 +7,8 @@ from src.sudoku.game import SudokuGame
 from src.memory.game import MemoryGame
 from src.snake.game import SnakeGame
 from src.tetris.game import TetrisGame
+from src.gomoku.game import GomokuGame
+from src.lianliankan.game import LianLianKanGame
 from src.common.colors import *
 
 def draw_menu(screen, selected, page=0):
@@ -20,7 +22,7 @@ def draw_menu(screen, selected, page=0):
     screen.blit(title, (screen.get_width()//2 - title.get_width()//2, 30))
     
     # 游戏选项列表
-    options = ["1. 打砖块", "2. 2048", "3. 扫雷", "4. 飞机大战", "5. 数独", "6. 记忆翻牌", "7. 贪吃蛇", "8. 俄罗斯方块", "9. 退出"]
+    options = ["1. 打砖块", "2. 2048", "3. 扫雷", "4. 飞机大战", "5. 数独", "6. 记忆翻牌", "7. 贪吃蛇", "8. 俄罗斯方块", "9. 五子棋", "10. 连连看", "11. 退出"]
     
     # 分页设置
     items_per_page = 6
@@ -83,9 +85,9 @@ def main():
                 running = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
-                    selected = (selected - 1) % 9
+                    selected = (selected - 1) % 11
                 elif event.key == pygame.K_DOWN:
-                    selected = (selected + 1) % 9
+                    selected = (selected + 1) % 11
                 elif event.key == pygame.K_LEFT:
                     if current_page > 0:
                         current_page -= 1
@@ -95,9 +97,12 @@ def main():
                         current_page += 1
                         selected = current_page * items_per_page
                 # 数字键快速选择
-                elif event.key in range(pygame.K_1, pygame.K_9 + 1):
-                    num = event.key - pygame.K_1
-                    if num < 9:  # 确保选择有效
+                elif event.key in range(pygame.K_1, pygame.K_9 + 1) or event.key == pygame.K_0:
+                    if event.key == pygame.K_0:
+                        num = 9
+                    else:
+                        num = event.key - pygame.K_1
+                    if num < 11:  # 确保选择有效
                         selected = num
                         current_page = num // items_per_page
                 elif event.key == pygame.K_RETURN:
@@ -126,6 +131,12 @@ def main():
                         game = TetrisGame()
                         game.run()
                     elif selected == 8:
+                        game = GomokuGame()
+                        game.run()
+                    elif selected == 9:
+                        game = LianLianKanGame()
+                        game.run()
+                    elif selected == 10:
                         running = False
                     # 重置窗口大小
                     screen = pygame.display.set_mode((800, 600))
