@@ -18,13 +18,13 @@ class BreakoutGame:
         self.paddle_width = 4
         self.paddle_height = 1
         self.paddle_pos = [width // 2 - self.paddle_width // 2, height - 2]
-        self.paddle_speed = 8
+        self.paddle_speed = 20  # 提高挡板移动速度到20
         self.moving_left = False
         self.moving_right = False
         
         # 初始化球
         self.ball_pos = [width // 2, height - 3]
-        self.ball_speed = [0.3, -0.3]
+        self.ball_speed = [0.3, -0.3]  # 降低球的移动速度到0.3
         
         # 初始化砖块
         self.bricks: List[List[Tuple[int, int, int]]] = []
@@ -84,7 +84,7 @@ class BreakoutGame:
                 self.game_over = True
             else:
                 new_ball_pos = [self.width // 2, self.height - 3]
-                self.ball_speed = [0.3, -0.3]
+                self.ball_speed = [0.5, -0.5]  # 重置时也使用新的速度
         
         # 检查球与挡板的碰撞
         if self._check_collision(self.paddle_pos, [self.paddle_width, self.paddle_height]):
@@ -147,7 +147,7 @@ class BreakoutGame:
                       self.block_size)
             
             # 显示得分和生命值
-            font = pygame.font.Font(None, 36)
+            font = pygame.font.Font("C:/Windows/Fonts/msyh.ttc", 36)
             score_text = font.render(f'得分: {self.score}', True, WHITE)
             lives_text = font.render(f'生命: {self.lives}', True, WHITE)
             self.screen.blit(score_text, (10, 10))

@@ -13,6 +13,7 @@ class Game2048:
         self.score = 0
         self.game_over = False
         self.grid = [[0] * width for _ in range(height)]
+        self.rules_shown = False
         
         # 初始化Pygame
         pygame.init()
@@ -72,19 +73,22 @@ class Game2048:
         if reverse:
             line = line[::-1]
         
-        # 移除零
+        # 移除零并创建新列表以跟踪已合并的数字
         non_zero = [x for x in line if x != 0]
+        merged = [False] * len(non_zero)
         
         # 合并相同数字
         result = []
         i = 0
         while i < len(non_zero):
-            if i + 1 < len(non_zero) and non_zero[i] == non_zero[i + 1]:
+            if i + 1 < len(non_zero) and non_zero[i] == non_zero[i + 1] and not merged[i] and not merged[i + 1]:
                 result.append(non_zero[i] * 2)
                 self.score += non_zero[i] * 2
+                merged[i] = merged[i + 1] = True
                 i += 2
             else:
-                result.append(non_zero[i])
+                if not merged[i]:
+                    result.append(non_zero[i])
                 i += 1
         
         # 补零
@@ -121,9 +125,44 @@ class Game2048:
         return moved
     
     def run(self):
-        while not self.game_over:
+        # 仅在首次进入游戏时显示游戏规则
+        if not self.rules_shown:
             self.screen.fill((187, 173, 160))
+            font = pygame.font.Font("C:/Windows/Fonts/msyh.ttc", 36)
+            rules = [
+                "游戏规则：",
+                "1. 使用方向键移动方块",
+                "2. 相同数字的方块相撞会合并",
+                "3. 每次移动后会出现一个新的2或4",
+                "4. 当无法移动时游戏结束",
+                "按任意键开始游戏"
+            ]
             
+            for i, rule in enumerate(rules):
+                text = font.render(rule, True, WHITE)
+                text_rect = text.get_rect(center=(self.screen_width//2, 100 + i * 50))
+                self.screen.blit(text, text_rect)
+            
+            pygame.display.flip()
+            
+            # 等待用户按键
+            waiting = True
+            while waiting:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        return
+                    if event.type == pygame.KEYDOWN:
+                        waiting = False
+                        if event.key == pygame.K_ESCAPE:
+                            pygame.display.set_mode((600, 500))
+                            pygame.display.set_caption("游戏合集")
+                            return
+            self.rules_shown = True
+            # 清空屏幕，避免规则文字残留
+            self.screen.fill((187, 173, 160))
+            pygame.display.flip()
+        
+        while not self.game_over:
             # 处理事件
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -161,7 +200,7 @@ class Game2048:
                         self.screen.blit(text, text_rect)
             
             # 显示得分
-            font = pygame.font.Font(None, 36)
+            font = pygame.font.Font("C:/Windows/Fonts/msyh.ttc", 36)
             score_text = font.render(f'得分: {self.score}', True, WHITE)
             self.screen.blit(score_text, (10, 10))
             

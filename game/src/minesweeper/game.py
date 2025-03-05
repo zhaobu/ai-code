@@ -141,7 +141,7 @@ class MinesweeperGame:
                         self.screen.blit(text, text_rect)
             
             # 显示剩余地雷数
-            font = pygame.font.Font(None, 36)
+            font = pygame.font.Font("C:/Windows/Fonts/msyh.ttc", 36)
             mines_text = font.render(f'剩余地雷: {self.remaining_mines}', True, WHITE)
             self.screen.blit(mines_text, (10, self.screen_height - 40))
             
@@ -156,7 +156,12 @@ class MinesweeperGame:
             if self.win:
                 text = font.render(f'恭喜获胜！得分: {self.score}', True, WHITE)
             else:
-                text = font.render('游戏结束', True, WHITE)
+                text = font.render('踩到地雷了！游戏结束', True, WHITE)
+                # 显示所有地雷位置
+                for y in range(self.height):
+                    for x in range(self.width):
+                        if self.grid[y][x] == -1:
+                            self.revealed[y][x] = True
             
             restart_text = font.render('按 R 重新开始', True, WHITE)
             menu_text = font.render('按 ESC 返回菜单', True, WHITE)
