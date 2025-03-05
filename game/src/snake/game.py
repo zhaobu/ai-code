@@ -16,7 +16,7 @@ class SnakeGame:
         self.screen_height = height * block_size
         self.score = 0
         self.game_over = False
-        self.speed = 10
+        self.speed = 5  # 降低初始速度
         self.speed_up_factor = 2
         self.speed_up_duration = 0
 
@@ -50,6 +50,75 @@ class SnakeGame:
             return True
         return False
 
+    def run(self):
+        while not self.game_over:
+            self.screen.fill(BACKGROUND)
+            
+            # 处理事件
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.game_over = True
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_UP and self.direction != (0, 1):
+                        self.direction = (0, -1)
+                    elif event.key == pygame.K_DOWN and self.direction != (0, -1):
+                        self.direction = (0, 1)
+                    elif event.key == pygame.K_LEFT and self.direction != (1, 0):
+                        self.direction = (-1, 0)
+                    elif event.key == pygame.K_RIGHT and self.direction != (-1, 0):
+                        self.direction = (1, 0)
+                    elif event.key == pygame.K_ESCAPE:  # 添加返回菜单功能
+                        return
+            
+            # 更新游戏状态
+            self.update()
+            
+            # 绘制游戏界面
+            draw_grid(self.screen, self.block_size, GRAY)
+            
+            # 绘制蛇身
+            for segment in self.snake:
+                draw_block(self.screen, GREEN, segment, self.block_size)
+            
+            # 绘制食物
+            draw_block(self.screen, RED, self.food, self.block_size)
+            
+            # 显示得分
+            font = pygame.font.Font(None, 36)
+            score_text = font.render(f'Score: {self.score}', True, WHITE)
+            self.screen.blit(score_text, (10, 10))
+            
+            pygame.display.flip()
+            self.clock.tick(self.speed)
+            
+            # 碰撞检测
+            if self._check_collision():
+                self.game_over = True
+
+        # 游戏结束处理（与俄罗斯方块保持一致）
+        while self.game_over:
+            self.screen.fill(BACKGROUND)
+            font = pygame.font.Font("C:/Windows/Fonts/msyh.ttc", 48)
+            text = font.render(f'最终得分: {self.score}', True, WHITE)
+            restart_text = font.render('按 R 重新开始', True, WHITE)
+            menu_text = font.render('按 ESC 返回菜单', True, WHITE)
+            
+            self.screen.blit(text, (self.screen_width//2 - text.get_width()//2, self.screen_height//2 - 80))
+            self.screen.blit(restart_text, (self.screen_width//2 - restart_text.get_width()//2, self.screen_height//2))
+            self.screen.blit(menu_text, (self.screen_width//2 - menu_text.get_width()//2, self.screen_height//2 + 60))
+            pygame.display.flip()
+            
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    return
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_r:
+                        self.__init__(self.width, self.height, self.block_size)
+                        self.run()
+                        return
+                    elif event.key == pygame.K_ESCAPE:
+                        return
+
     def update(self) -> None:
         """更新游戏状态"""
         if self.game_over:
@@ -69,56 +138,6 @@ class SnakeGame:
             # 移除蛇尾
             self.snake.pop()
 
-        # 检查碰撞
-        if self._check_collision():
-            self.game_over = True
-
-    def draw(self) -> None:
-        """绘制游戏界面"""
-        self.screen.fill(BACKGROUND)
-
-        # 绘制网格
-        draw_grid(self.screen, self.block_size, GRID_COLOR)
-
-        # 绘制蛇
-        for segment in self.snake:
-            draw_block(self.screen, GREEN, segment, self.block_size)
-
-        # 显示积分
-        font = pygame.font.Font(None, 36)
-        score_text = font.render(f'Score: {self.score}', True, WHITE)
-        self.screen.blit(score_text, (10, 10))
-
-        # 绘制食物
-        draw_block(self.screen, RED, self.food, self.block_size)
-
-        pygame.display.flip()
-        self.clock.tick(self.speed)
-
-    def run(self) -> None:
-        """运行游戏主循环"""
-        while not self.game_over:
-            self.update()
-            self.draw()
-
-            # 处理事件
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    logging.debug('Game window closed by user')
-                    self.game_over = True
-                elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_UP and self.direction != (0, 1):
-                        self.direction = (0, -1)
-                        self.speed_up_duration = 10
-                    elif event.key == pygame.K_DOWN and self.direction != (0, -1):
-                        self.direction = (0, 1)
-                        self.speed_up_duration = 10
-                    elif event.key == pygame.K_LEFT and self.direction != (1, 0):
-                        self.direction = (-1, 0)
-                        self.speed_up_duration = 10
-                    elif event.key == pygame.K_RIGHT and self.direction != (-1, 0):
-                        self.direction = (1, 0)
-                        self.speed_up_duration = 10
-
-            self.speed = self.speed * self.speed_up_factor if self.speed_up_duration > 0 else 10
-            self.speed_up_duration = max(0, self.speed_up_duration - 1)
+        # 更新速度逻辑（移除错误的事件处理代码）
+        self.speed = self.speed * self.speed_up_factor if self.speed_up_duration > 0 else 10
+        self.speed_up_duration = max(0, self.speed_up_duration - 1)

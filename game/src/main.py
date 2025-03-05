@@ -1,7 +1,7 @@
 import pygame
 from src.tetris.game import TetrisGame
 from src.snake.game import SnakeGame
-from common.colors import *
+from src.common.colors import *
 
 def draw_menu(screen, selected):
     """绘制游戏选择菜单"""

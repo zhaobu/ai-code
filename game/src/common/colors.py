@@ -8,7 +8,7 @@ CYAN = (0, 255, 255)
 MAGENTA = (255, 0, 255)
 YELLOW = (255, 255, 0)
 ORANGE = (255, 165, 0)
-
+GRAY = (128, 128, 128)
 # 游戏背景色
 BACKGROUND = BLACK
 # 网格线颜色
