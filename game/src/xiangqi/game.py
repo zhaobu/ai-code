@@ -271,6 +271,8 @@ class XiangqiGame:
         # 检查将帅是否被吃掉
         red_general_exists = False
         black_general_exists = False
+        red_general_pos = None
+        black_general_pos = None
         
         for y in range(self.board_height):
             for x in range(self.board_width):
@@ -278,15 +280,39 @@ class XiangqiGame:
                 if piece is not None and piece['type'] == 'general':
                     if piece['color'] == 'red':
                         red_general_exists = True
+                        red_general_pos = (x, y)
                     else:
                         black_general_exists = True
+                        black_general_pos = (x, y)
         
+        # 如果一方的将帅被吃掉，游戏结束
         if not red_general_exists:
             self.winner = 'black'
+            self.game_over = True
             return True
         if not black_general_exists:
             self.winner = 'red'
+            self.game_over = True
             return True
+            
+        # 检查将帅是否在同一列且中间无子（对将）
+        if red_general_pos and black_general_pos and red_general_pos[0] == black_general_pos[0]:
+            # 检查两个将帅之间是否有其他棋子
+            x = red_general_pos[0]
+            start_y = min(red_general_pos[1], black_general_pos[1])
+            end_y = max(red_general_pos[1], black_general_pos[1])
+            has_piece_between = False
+            
+            for y in range(start_y + 1, end_y):
+                if self.board[y][x] is not None:
+                    has_piece_between = True
+                    break
+            
+            # 如果将帅之间无子，当前回合方失败
+            if not has_piece_between:
+                self.winner = 'black' if self.is_red_turn else 'red'
+                self.game_over = True
+                return True
         
         return False
     
@@ -298,7 +324,30 @@ class XiangqiGame:
                                self.board_width * self.block_size + 10,
                                self.board_height * self.block_size + 10)
         pygame.draw.rect(self.screen, (210, 180, 140), board_rect)  # 实木色调
-        
+        # 如果游戏结束，显示胜负结果
+        if self.game_over and self.winner:
+            # 创建半透明黑色遮罩
+            overlay = pygame.Surface((self.screen_width, self.screen_height))
+            overlay.fill((0, 0, 0))
+            overlay.set_alpha(128)
+            self.screen.blit(overlay, (0, 0))
+            
+            font = pygame.font.Font("C:/Windows/Fonts/msyh.ttc", 72)  # 使用更大的字体
+            text = f"{'红方' if self.winner == 'red' else '黑方'}胜利！"
+            text_surface = font.render(text, True, RED if self.winner == 'red' else BLACK)
+            text_rect = text_surface.get_rect(center=(self.screen_width // 2, self.screen_height // 2 - 60))
+            
+            font_small = pygame.font.Font("C:/Windows/Fonts/msyh.ttc", 36)
+            restart_text = font_small.render("按R重新开始", True, WHITE)
+            menu_text = font_small.render("按ESC返回菜单", True, WHITE)
+            
+            restart_rect = restart_text.get_rect(center=(self.screen_width // 2, self.screen_height // 2 + 20))
+            menu_rect = menu_text.get_rect(center=(self.screen_width // 2, self.screen_height // 2 + 80))
+            
+            self.screen.blit(text_surface, text_rect)
+            self.screen.blit(restart_text, restart_rect)
+            self.screen.blit(menu_text, menu_rect)
+    
         # 绘制走子记录区域
         history_area_x = self.margin + self.board_width * self.block_size + self.margin
         history_area_y = self.margin
@@ -664,7 +713,18 @@ class XiangqiGame:
                     self.scroll_offset = min(max_scroll, self.scroll_offset + 30)
                     self.history_needs_update = True
                 elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
+                    if event.key == pygame.K_r and self.game_over:
+                        # 保持当前游戏模式，重新初始化游戏
+                        vs_ai = self.vs_ai
+                        ai_difficulty = self.ai_difficulty
+                        self.__init__(self.block_size)
+                        self.game_started = True
+                        self.vs_ai = vs_ai
+                        self.ai_difficulty = ai_difficulty
+                        if self.vs_ai:
+                            self.ai = XiangqiAI(self.ai_difficulty)
+                        continue
+                    elif event.key == pygame.K_ESCAPE:
                         pygame.display.set_mode((600, 500))
                         pygame.display.set_caption("游戏合集")
                         return
