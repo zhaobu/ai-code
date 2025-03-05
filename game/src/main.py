@@ -1,6 +1,9 @@
 import pygame
 from src.tetris.game import TetrisGame
 from src.snake.game import SnakeGame
+from src.breakout.game import BreakoutGame
+from src.game2048.game import Game2048
+from src.minesweeper.game import MinesweeperGame
 from src.common.colors import *
 
 def draw_menu(screen, selected):
@@ -14,7 +17,7 @@ def draw_menu(screen, selected):
     screen.blit(title, (screen.get_width()//2 - title.get_width()//2, 50))
     
     # 绘制菜单项
-    options = ["1. 俄罗斯方块", "2. 贪吃蛇", "3. 退出"]
+    options = ["1. 俄罗斯方块", "2. 贪吃蛇", "3. 打砖块", "4. 2048", "5. 扫雷", "6. 退出"]
     for i, option in enumerate(options):
         color = WHITE if i != selected else RED
         text = menu_font.render(option, True, color)
@@ -45,9 +48,9 @@ def main():
                 running = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
-                    selected = (selected - 1) % 3
+                    selected = (selected - 1) % 6
                 elif event.key == pygame.K_DOWN:
-                    selected = (selected + 1) % 3
+                    selected = (selected + 1) % 6
                 elif event.key == pygame.K_RETURN:
                     if selected == 0:
                         game = TetrisGame()
@@ -56,6 +59,15 @@ def main():
                         game = SnakeGame()
                         game.run()
                     elif selected == 2:
+                        game = BreakoutGame()
+                        game.run()
+                    elif selected == 3:
+                        game = Game2048()
+                        game.run()
+                    elif selected == 4:
+                        game = MinesweeperGame()
+                        game.run()
+                    elif selected == 5:
                         running = False
     
     pygame.quit()
