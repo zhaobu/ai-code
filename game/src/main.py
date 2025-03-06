@@ -10,11 +10,12 @@ from src.tetris.game import TetrisGame
 from src.gomoku.game import GomokuGame
 from src.lianliankan.game import LianLianKanGame
 from src.xiangqi.game import XiangqiGame
+from src.bomberman.game import BombermanGame
 from src.common.colors import *
 from src.lianliankan.game import LianLianKanGame
 from src.common.colors import *
 
-options = ["1. 打砖块", "2. 2048", "3. 扫雷", "4. 飞机大战", "5. 数独", "6. 记忆翻牌", "7. 贪吃蛇", "8. 俄罗斯方块", "9. 五子棋", "10. 连连看", "11. 中国象棋"]
+options = ["1. 打砖块", "2. 2048", "3. 扫雷", "4. 飞机大战", "5. 数独", "6. 记忆翻牌", "7. 贪吃蛇", "8. 俄罗斯方块", "9. 五子棋", "10. 连连看", "11. 中国象棋", "12. 炸弹人"]
 
 def draw_menu(screen, selected, page=0):
     """绘制游戏选择菜单"""
@@ -173,6 +174,9 @@ def main():
                             game.run()
                         elif game_index == 10:
                             game = XiangqiGame()
+                            game.run()
+                        elif game_index == 11:
+                            game = BombermanGame()
                             game.run()
                         # 重置窗口大小
                         screen = pygame.display.set_mode((800, 600))
