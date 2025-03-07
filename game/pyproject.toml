@@ -9,6 +9,9 @@ packages = [{include = "snake_game.py"}]
 [tool.poetry.dependencies]
 python = "^3.10"
 pygame = "^2.5.2"
+pymunk = "^6.11.1"
+modelscope = "^1.23.2"
+numpy = "^2.2.3"
 
 
 [tool.poetry.group.dev.dependencies]

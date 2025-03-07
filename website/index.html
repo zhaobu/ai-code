@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小红书App原型</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f5f5f5; }
+        .prototype-frame {
+            width: 390px;
+            height: 844px;
+            background: white;
+            border-radius: 40px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .frame-container {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        .frame-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .nav-item {
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .nav-item:hover {
+            color: #ff2442;
+        }
+        .nav-item.active {
+            color: #ff2442;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-8">
+    <div class="flex gap-8">
+        <!-- 导航菜单 -->
+        <div class="flex flex-col gap-4">
+            <div class="nav-item active" onclick="switchPage('home.html')">
+                <i class="fas fa-home text-2xl"></i>
+                <div class="text-sm">首页</div>
+            </div>
+            <div class="nav-item" onclick="switchPage('discover.html')">
+                <i class="fas fa-compass text-2xl"></i>
+                <div class="text-sm">发现</div>
+            </div>
+            <div class="nav-item" onclick="switchPage('publish.html')">
+                <i class="fas fa-plus-circle text-2xl"></i>
+                <div class="text-sm">发布</div>
+            </div>
+            <div class="nav-item" onclick="switchPage('message.html')">
+                <i class="fas fa-comment text-2xl"></i>
+                <div class="text-sm">消息</div>
+            </div>
+            <div class="nav-item" onclick="switchPage('profile.html')">
+                <i class="fas fa-user text-2xl"></i>
+                <div class="text-sm">我</div>
+            </div>
+        </div>
+        <!-- 手机框架 -->
+        <div class="prototype-frame">
+            <div class="frame-container">
+                <iframe id="contentFrame" src="home.html"></iframe>
+            </div>
+        </div>
+    </div>
+    <script>
+        function switchPage(page) {
+            document.getElementById('contentFrame').src = page;
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+        }
+    </script>
+</body>
+</html>

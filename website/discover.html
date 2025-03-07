@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>发现 - 小红书</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f5f5f5; }
+        .topic-card {
+            transition: all 0.3s;
+        }
+        .topic-card:hover {
+            transform: scale(1.02);
+        }
+    </style>
+</head>
+<body class="bg-white">
+    <!-- 顶部导航栏 -->
+    <div class="sticky top-0 bg-white border-b z-10 px-4 py-2">
+        <div class="flex justify-between items-center">
+            <div class="text-lg font-bold">发现</div>
+            <div class="flex gap-4">
+                <i class="fas fa-search text-xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- 分类导航 -->
+    <div class="px-4 py-3 overflow-x-auto flex gap-3 text-sm">
+        <div class="px-3 py-1 bg-red-50 text-red-500 rounded-full whitespace-nowrap">推荐</div>
+        <div class="px-3 py-1 bg-gray-100 rounded-full whitespace-nowrap">美食</div>
+        <div class="px-3 py-1 bg-gray-100 rounded-full whitespace-nowrap">时尚</div>
+        <div class="px-3 py-1 bg-gray-100 rounded-full whitespace-nowrap">旅行</div>
+        <div class="px-3 py-1 bg-gray-100 rounded-full whitespace-nowrap">美妆</div>
+        <div class="px-3 py-1 bg-gray-100 rounded-full whitespace-nowrap">生活</div>
+    </div>
+
+    <!-- 热门话题 -->
+    <div class="p-4">
+        <h2 class="text-lg font-bold mb-3">热门话题</h2>
+        <div class="grid grid-cols-2 gap-4">
+            <div class="topic-card bg-gradient-to-r from-pink-500 to-red-500 rounded-lg p-4 text-white">
+                <h3 class="font-bold mb-1">#春日穿搭</h3>
+                <p class="text-sm opacity-90">1.2万篇笔记</p>
+            </div>
+            <div class="topic-card bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg p-4 text-white">
+                <h3 class="font-bold mb-1">#美食探店</h3>
+                <p class="text-sm opacity-90">8.5万篇笔记</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 推荐内容 -->
+    <div class="p-4">
+        <h2 class="text-lg font-bold mb-3">为你推荐</h2>
+        <div class="grid grid-cols-2 gap-4">
+            <!-- 推荐内容1 -->
+            <div class="bg-white rounded-lg overflow-hidden shadow-sm">
+                <img src="https://picsum.photos/300/404" class="w-full h-48 object-cover" alt="推荐内容">
+                <div class="p-2">
+                    <p class="text-sm line-clamp-2">周末探店｜这家新开的甜品店也太可爱了吧！</p>
+                    <div class="flex items-center mt-2 text-xs text-gray-500">
+                        <img src="https://picsum.photos/104" class="w-5 h-5 rounded-full" alt="用户头像">
+                        <span class="ml-1">甜品控</span>
+                        <div class="ml-auto">
+                            <i class="far fa-heart"></i> 892
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 推荐内容2 -->
+            <div class="bg-white rounded-lg overflow-hidden shadow-sm">
+                <img src="https://picsum.photos/300/405" class="w-full h-48 object-cover" alt="推荐内容">
+                <div class="p-2">
+                    <p class="text-sm line-clamp-2">小众景点推荐｜这些地方太适合拍照了！</p>
+                    <div class="flex items-center mt-2 text-xs text-gray-500">
+                        <img src="https://picsum.photos/105" class="w-5 h-5 rounded-full" alt="用户头像">
+                        <span class="ml-1">旅行达人</span>
+                        <div class="ml-auto">
+                            <i class="far fa-heart"></i> 1.5k
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

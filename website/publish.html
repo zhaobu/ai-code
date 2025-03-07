@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>发布 - 小红书</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f5f5f5; }
+        .upload-area {
+            border: 2px dashed #ddd;
+            transition: all 0.3s;
+        }
+        .upload-area:hover {
+            border-color: #ff2442;
+        }
+    </style>
+</head>
+<body class="bg-white">
+    <!-- 顶部导航栏 -->
+    <div class="sticky top-0 bg-white border-b z-10 px-4 py-2">
+        <div class="flex justify-between items-center">
+            <div class="text-gray-400">取消</div>
+            <div class="text-lg font-bold">发布笔记</div>
+            <div class="text-red-500 font-medium">发布</div>
+        </div>
+    </div>
+
+    <!-- 发布内容区域 -->
+    <div class="p-4">
+        <!-- 图片上传区域 -->
+        <div class="upload-area rounded-lg p-8 mb-4 flex flex-col items-center justify-center">
+            <i class="fas fa-camera text-3xl text-gray-400 mb-2"></i>
+            <div class="text-sm text-gray-500">点击上传图片或视频</div>
+            <div class="text-xs text-gray-400 mt-1">最多9张图片或1个视频</div>
+        </div>
+
+        <!-- 文本编辑区域 -->
+        <div class="mb-4">
+            <textarea class="w-full p-3 rounded-lg border-0 bg-gray-50 placeholder-gray-400 focus:ring-0" rows="4" placeholder="分享你的新鲜发现..."></textarea>
+        </div>
+
+        <!-- 标签选择 -->
+        <div class="mb-4">
+            <div class="flex items-center gap-2 mb-2">
+                <i class="fas fa-hashtag text-gray-400"></i>
+                <span class="text-sm text-gray-600">添加标签</span>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <div class="px-3 py-1 bg-gray-100 rounded-full text-sm text-gray-600">#美食</div>
+                <div class="px-3 py-1 bg-gray-100 rounded-full text-sm text-gray-600">#探店</div>
+                <div class="px-3 py-1 bg-gray-100 rounded-full text-sm text-gray-600">#生活记录</div>
+                <div class="px-3 py-1 border border-dashed border-gray-300 rounded-full text-sm text-gray-400">+ 添加</div>
+            </div>
+        </div>
+
+        <!-- 其他设置 -->
+        <div class="space-y-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-map-marker-alt text-gray-400"></i>
+                    <span class="text-sm text-gray-600">添加位置</span>
+                </div>
+                <i class="fas fa-chevron-right text-gray-300"></i>
+            </div>
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-link text-gray-400"></i>
+                    <span class="text-sm text-gray-600">添加链接</span>
+                </div>
+                <i class="fas fa-chevron-right text-gray-300"></i>
+            </div>
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-eye text-gray-400"></i>
+                    <span class="text-sm text-gray-600">谁可以看</span>
+                </div>
+                <div class="flex items-center gap-1">
+                    <span class="text-sm text-gray-400">所有人</span>
+                    <i class="fas fa-chevron-right text-gray-300"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

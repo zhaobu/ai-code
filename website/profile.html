@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我 - 小红书</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f5f5f5; }
+        .note-card {
+            transition: all 0.3s;
+        }
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="bg-white">
+    <!-- 顶部导航栏 -->
+    <div class="sticky top-0 bg-white border-b z-10 px-4 py-2">
+        <div class="flex justify-between items-center">
+            <div class="text-lg font-bold">我</div>
+            <div class="flex gap-4">
+                <i class="fas fa-cog text-xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- 用户信息 -->
+    <div class="p-4">
+        <div class="flex items-center gap-4">
+            <img src="https://picsum.photos/200" class="w-20 h-20 rounded-full" alt="用户头像">
+            <div class="flex-1">
+                <div class="font-bold text-lg">小红薯</div>
+                <div class="text-sm text-gray-500 mt-1">小红书号：xiaohongshu123</div>
+                <div class="text-sm text-gray-500 mt-1">分享美好生活</div>
+            </div>
+        </div>
+
+        <!-- 数据统计 -->
+        <div class="flex justify-around mt-6 text-center">
+            <div>
+                <div class="font-bold">38</div>
+                <div class="text-sm text-gray-500">关注</div>
+            </div>
+            <div>
+                <div class="font-bold">128</div>
+                <div class="text-sm text-gray-500">粉丝</div>
+            </div>
+            <div>
+                <div class="font-bold">96</div>
+                <div class="text-sm text-gray-500">获赞与收藏</div>
+            </div>
+        </div>
+
+        <!-- 编辑资料按钮 -->
+        <button class="w-full mt-4 py-2 rounded-full border border-gray-300 text-sm">编辑资料</button>
+    </div>
+
+    <!-- 内容分类 -->
+    <div class="bg-white">
+        <div class="flex border-b">
+            <div class="flex-1 text-center py-3 text-red-500 border-b-2 border-red-500">笔记</div>
+            <div class="flex-1 text-center py-3 text-gray-500">收藏</div>
+            <div class="flex-1 text-center py-3 text-gray-500">赞过</div>
+        </div>
+
+        <!-- 笔记列表 -->
+        <div class="grid grid-cols-2 gap-2 p-2">
+            <!-- 笔记1 -->
+            <div class="note-card rounded-lg overflow-hidden">
+                <img src="https://picsum.photos/300/406" class="w-full h-40 object-cover" alt="笔记图片">
+                <div class="p-2">
+                    <p class="text-sm line-clamp-2">今天去探店啦！发现了一家超级好吃的日料店</p>
+                    <div class="flex items-center mt-2 text-xs text-gray-500">
+                        <span><i class="far fa-heart"></i> 328</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 笔记2 -->
+            <div class="note-card rounded-lg overflow-hidden">
+                <img src="https://picsum.photos/300/407" class="w-full h-40 object-cover" alt="笔记图片">
+                <div class="p-2">
+                    <p class="text-sm line-clamp-2">分享一下我的护肤心得，这些产品真的很好用！</p>
+                    <div class="flex items-center mt-2 text-xs text-gray-500">
+                        <span><i class="far fa-heart"></i> 256</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

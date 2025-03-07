@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>消息 - 小红书</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f5f5f5; }
+        .message-item {
+            transition: all 0.3s;
+        }
+        .message-item:hover {
+            background-color: #f8f8f8;
+        }
+    </style>
+</head>
+<body class="bg-white">
+    <!-- 顶部导航栏 -->
+    <div class="sticky top-0 bg-white border-b z-10 px-4 py-2">
+        <div class="flex justify-between items-center">
+            <div class="text-lg font-bold">消息</div>
+            <div class="flex gap-4">
+                <i class="fas fa-ellipsis-h text-xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- 消息列表 -->
+    <div class="p-4 space-y-4">
+        <!-- 系统通知 -->
+        <div class="message-item flex items-center gap-3 p-3 rounded-lg">
+            <div class="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center">
+                <i class="fas fa-bell text-red-500 text-xl"></i>
+            </div>
+            <div class="flex-1">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <div class="font-medium">系统通知</div>
+                        <div class="text-sm text-gray-500">你的笔记获得了100个赞</div>
+                    </div>
+                    <div class="text-xs text-gray-400">1小时前</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 赞和收藏 -->
+        <div class="message-item flex items-center gap-3 p-3 rounded-lg">
+            <div class="w-12 h-12 bg-pink-50 rounded-full flex items-center justify-center">
+                <i class="fas fa-heart text-pink-500 text-xl"></i>
+            </div>
+            <div class="flex-1">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <div class="font-medium">赞和收藏</div>
+                        <div class="text-sm text-gray-500">查看都有谁互动了你的笔记</div>
+                    </div>
+                    <div class="text-xs text-gray-400">2小时前</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 新增关注 -->
+        <div class="message-item flex items-center gap-3 p-3 rounded-lg">
+            <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center">
+                <i class="fas fa-user-plus text-blue-500 text-xl"></i>
+            </div>
+            <div class="flex-1">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <div class="font-medium">新增关注</div>
+                        <div class="text-sm text-gray-500">看看都有谁关注了你</div>
+                    </div>
+                    <div class="text-xs text-gray-400">昨天</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 评论回复 -->
+        <div class="message-item flex items-center gap-3 p-3 rounded-lg">
+            <div class="w-12 h-12 bg-purple-50 rounded-full flex items-center justify-center">
+                <i class="fas fa-comment text-purple-500 text-xl"></i>
+            </div>
+            <div class="flex-1">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <div class="font-medium">评论和回复</div>
+                        <div class="text-sm text-gray-500">查看笔记的最新评论</div>
+                    </div>
+                    <div class="text-xs text-gray-400">2天前</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 私信消息 -->
+        <div class="message-item flex items-center gap-3 p-3 rounded-lg">
+            <img src="https://picsum.photos/106" class="w-12 h-12 rounded-full" alt="用户头像">
+            <div class="flex-1">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <div class="font-medium">美食达人</div>
+                        <div class="text-sm text-gray-500">谢谢你的关注！我们可以交流美食心得~</div>
+                    </div>
+                    <div class="text-xs text-gray-400">3天前</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
