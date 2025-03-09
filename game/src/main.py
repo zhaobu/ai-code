@@ -17,6 +17,7 @@ from src.xiangqi.game import XiangqiGame
 from src.bomberman.game import BombermanGame
 from src.flappybird.game import FlappyBirdGame
 from src.jungle.game import JungleGame
+from src.spaceshield.game import SpaceshieldGame
 from src.common.colors import *
 
 options = [
@@ -33,7 +34,8 @@ options = [
     "11. 中国象棋",
     "12. 炸弹人",
     "13. Flappy Bird",
-    "14. 军棋"
+"14. 军棋",
+"15. 太空防御战"
 ]
 
 def draw_menu(screen, selected, page=0):
@@ -141,7 +143,7 @@ def main():
                     if selected == current_page_options:
                         running = False
                         continue
-                    
+
                     game_index = current_page * items_per_page + selected
                     if game_index < len(options):
                         if game_index == 0:
@@ -172,13 +174,13 @@ def main():
                             game = FlappyBirdGame()
                         elif game_index == 13:
                             game = JungleGame()
+                        elif game_index == 14:
+                            game = SpaceshieldGame()
                         game.run()
                         screen = pygame.display.set_mode((800, 600))
                         pygame.display.set_caption("游戏合集")
                     else:
                         running = False
-    
-    pygame.quit()
 
 if __name__ == "__main__":
     main()
