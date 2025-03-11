@@ -8,39 +8,48 @@ class Piece:
         self.row = row
         self.col = col
         self.selected = False
+        self.font = pygame.font.Font("C:/Windows/Fonts/msyh.ttc", 16)
 
     def draw(self, win, x, y):
-        center_x = x + CELL_SIZE//2
-        center_y = y + CELL_SIZE//2
+        # 绘制棋子背景
+        radius = CELL_SIZE // 2 - 4
+        center = (x + CELL_SIZE // 2, y + CELL_SIZE // 2)
         
-        # Draw piece base
-        color = COLORS['red_team'] if self.team == 'red' else COLORS['blue_team']
-        pygame.draw.circle(win, color, (center_x, center_y), CELL_SIZE//3)
-        
-        # Draw rank text with Chinese font
-        font = pygame.font.Font("C:/Windows/Fonts/msyh.ttc", 24)
-        text = font.render(RANK_NAMES[self.rank], True, COLORS['text'])
-        text_rect = text.get_rect(center=(center_x, center_y))
-        win.blit(text, text_rect)
-        
-        # Draw selection highlight
+        # 绘制选中状态
         if self.selected:
-            pygame.draw.circle(win, COLORS['highlight'], (center_x, center_y), CELL_SIZE//3 + 2, 3)
+            pygame.draw.circle(win, COLORS['selected'], center, radius + 2)
+        
+        # 绘制棋子
+        color = (255, 0, 0) if self.team == 'red' else (0, 0, 255)
+        pygame.draw.circle(win, color, center, radius)
+        
+        # 绘制棋子等级名称
+        text = RANK_NAMES.get(self.rank, str(self.rank))
+        text_surface = self.font.render(text, True, (255, 255, 255))
+        text_rect = text_surface.get_rect(center=center)
+        win.blit(text_surface, text_rect)
 
     def move(self, row, col):
+        """移动棋子到新位置"""
         self.row = row
         self.col = col
 
-    def __repr__(self):
-        return f"{self.team} {RANK_NAMES[self.rank]} ({self.row},{self.col})"
-
-    def can_capture(self, other):
-        if self.rank == 11:  # 炸弹可以炸任何棋子
+    def can_capture(self, target):
+        """判断是否可以吃掉目标棋子"""
+        # 工兵可以炸掉地雷
+        if self.rank == 2 and target.rank == 10:
             return True
-        if other.rank == 11:  # 炸弹可以被任何棋子引爆
+            
+        # 地雷不能移动，所以不能吃子
+        if self.rank == 10:
+            return False
+            
+        # 军旗不能吃子
+        if self.rank == 12:
+            return False
+            
+        # 一般规则：大子可以吃小子
+        if target.rank == 12:  # 可以吃军旗
             return True
-        if other.rank == 10:  # 地雷只能被工兵排除
-            return self.rank == 1
-        if other.rank == 12:  # 军旗可以被任何移动的棋子夺取
-            return True
-        return self.rank > other.rank
+            
+        return self.rank >= target.rank

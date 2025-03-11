@@ -5,7 +5,9 @@ from .constants import *
 
 class JungleGame:
     def __init__(self):
-        self.win = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        self.screen_width = SCREEN_WIDTH
+        self.screen_height = SCREEN_HEIGHT
+        self.win = pygame.display.set_mode((self.screen_width, self.screen_height))
         self.board = [[None for _ in range(BOARD_COLS)] for _ in range(BOARD_ROWS)]
         self.selected_piece = None
         self.turn = 'red'
@@ -14,37 +16,54 @@ class JungleGame:
         self.history = []
         self.status_font = pygame.font.Font("C:/Windows/Fonts/msyh.ttc", 32)
         self.hint_font = pygame.font.Font("C:/Windows/Fonts/msyh.ttc", 20)
-        self._init_pieces()
+        self.game_started = False  # 是否已经选择游戏模式
+        self.vs_ai = False  # 是否是人机对战模式
+        self.ai_difficulty = 'normal'  # AI难度
+        self.menu_index = 0  # 当前选中的菜单项
+        self.difficulties = [('简单', 'easy'), ('中等', 'normal'), ('困难', 'hard')]
+        self.diff_index = 1  # 当前选中的难度（默认中等）
+        self.initialize_board()
 
-    def _init_pieces(self):
-        # 初始化棋子（保持原有初始化代码）
+    def initialize_board(self):
+        """初始化棋盘和棋子"""
+        # 清空棋盘
+        self.board = [[None for _ in range(BOARD_COLS)] for _ in range(BOARD_ROWS)]
+        
+        # 初始化红方棋子
         red_pieces = [
-            (12, 0, 3), (9, 0, 0), (8, 0, 6),
-            (7, 1, 1), (7, 1, 5),
-            (6, 2, 2), (6, 2, 4),
-            (5, 3, 3),
-            (4, 2, 0), (4, 2, 6),
-            (3, 3, 1), (3, 3, 5),
-            (2, 4, 2), (2, 4, 4),
-            (10, 5, 1), (10, 5, 5),
-            (11, 6, 0), (11, 6, 6)
+            (12, 0, 3),  # 军旗
+            (11, 6, 0),  # 司令
+            (10, 2, 2), (10, 2, 4),  # 地雷
+            (9, 6, 6),   # 军长
+            (8, 0, 0),   # 师长
+            (7, 1, 1), (7, 1, 5),  # 旅长
+            (6, 2, 0), (6, 2, 6),  # 团长
+            (5, 3, 1), (5, 3, 5),  # 营长
+            (4, 4, 2), (4, 4, 4),  # 连长
+            (3, 5, 1), (3, 5, 5),  # 排长
+            (2, 0, 6), (2, 3, 3)   # 工兵
         ]
         
+        # 初始化蓝方棋子
         blue_pieces = [
-            (12, 8, 3), (9, 8, 6), (8, 8, 0),
-            (7, 7, 1), (7, 7, 5),
-            (6, 6, 2), (6, 6, 4),
-            (5, 5, 3),
-            (4, 6, 0), (4, 6, 6),
-            (3, 7, 1), (3, 7, 5),
-            (2, 8, 2), (2, 8, 4),
-            (10, 3, 1), (10, 3, 5),
-            (11, 2, 0), (11, 2, 6)
+            (12, 8, 3),  # 军旗
+            (11, 2, 6),  # 司令
+            (10, 6, 2), (10, 6, 4),  # 地雷
+            (9, 2, 0),   # 军长
+            (8, 8, 6),   # 师长
+            (7, 7, 1), (7, 7, 5),  # 旅长
+            (6, 6, 0), (6, 6, 6),  # 团长
+            (5, 5, 1), (5, 5, 5),  # 营长
+            (4, 4, 2), (4, 4, 4),  # 连长
+            (3, 3, 1), (3, 3, 5),  # 排长
+            (2, 8, 0), (2, 5, 3)   # 工兵
         ]
 
+        # 放置红方棋子
         for rank, row, col in red_pieces:
             self.board[row][col] = Piece(rank, 'red', row, col)
             
+        # 放置蓝方棋子
         for rank, row, col in blue_pieces:
             self.board[row][col] = Piece(rank, 'blue', row, col)
 
@@ -131,6 +150,107 @@ class JungleGame:
                                  (x, y), 10)
         
         pygame.display.update()
+
+    def draw_mode_selection(self):
+        """绘制游戏模式选择界面"""
+        self.win.fill(COLORS['background'])
+        
+        # 绘制标题
+        title_font = pygame.font.Font("C:/Windows/Fonts/msyh.ttc", 48)
+        title = title_font.render("军旗", True, COLORS['text'])
+        title_rect = title.get_rect(center=(self.screen_width//2, 100))
+        self.win.blit(title, title_rect)
+        
+        # 绘制模式选择按钮
+        button_font = pygame.font.Font("C:/Windows/Fonts/msyh.ttc", 36)
+        
+        # 双人对战按钮
+        pvp_text = button_font.render("双人对战", True, COLORS['text'])
+        pvp_rect = pvp_text.get_rect(center=(self.screen_width//2, 200))
+        button_color = COLORS['selected'] if self.menu_index == 0 and not self.vs_ai else COLORS['button']
+        pygame.draw.rect(self.win, button_color, pvp_rect.inflate(40, 20))
+        self.win.blit(pvp_text, pvp_rect)
+        
+        # 人机对战按钮
+        pve_text = button_font.render("人机对战", True, COLORS['text'])
+        pve_rect = pve_text.get_rect(center=(self.screen_width//2, 300))
+        button_color = COLORS['selected'] if self.menu_index == 1 or self.vs_ai else COLORS['button']
+        pygame.draw.rect(self.win, button_color, pve_rect.inflate(40, 20))
+        self.win.blit(pve_text, pve_rect)
+        
+        # 如果选择了人机对战，显示难度选择
+        if self.vs_ai:
+            for i, (text, _) in enumerate(self.difficulties):
+                diff_text = button_font.render(text, True, COLORS['text'])
+                diff_rect = diff_text.get_rect(center=(self.screen_width//2, 400 + i*60))
+                button_color = COLORS['selected'] if i == self.diff_index else COLORS['button']
+                pygame.draw.rect(self.win, button_color, diff_rect.inflate(40, 20))
+                self.win.blit(diff_text, diff_rect)
+        
+        # 绘制操作提示
+        hint_text = "↑↓: 选择  Enter: 确认  ESC: 返回"
+        hint = self.hint_font.render(hint_text, True, COLORS['text'])
+        hint_rect = hint.get_rect(center=(self.screen_width//2, SCREEN_HEIGHT - 30))
+        self.win.blit(hint, hint_rect)
+        
+        pygame.display.update()
+
+    def handle_mode_selection(self, event):
+        """处理游戏模式选择的事件"""
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_pos = pygame.mouse.get_pos()
+            # 检查双人对战按钮
+            pvp_rect = pygame.Rect(self.screen_width//2 - 70, 185, 140, 40)
+            if pvp_rect.collidepoint(mouse_pos):
+                self.vs_ai = False
+                self.game_started = True
+                return
+            
+            # 检查人机对战按钮
+            pve_rect = pygame.Rect(self.screen_width//2 - 70, 285, 140, 40)
+            if pve_rect.collidepoint(mouse_pos):
+                self.vs_ai = True
+                return
+            
+            # 如果显示难度选择，检查难度按钮
+            if self.vs_ai:
+                for i, (_, diff) in enumerate(self.difficulties):
+                    diff_rect = pygame.Rect(self.screen_width//2 - 70, 385 + i*60, 140, 40)
+                    if diff_rect.collidepoint(mouse_pos):
+                        self.ai_difficulty = diff
+                        self.game_started = True
+                        return
+        
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                if self.vs_ai and not self.game_started:
+                    self.vs_ai = False  # 返回到主菜单
+                else:
+                    pygame.display.set_mode((600, 500))
+                    pygame.display.set_caption("游戏合集")
+                    return True
+            
+            elif event.key == pygame.K_UP:
+                if self.vs_ai:
+                    self.diff_index = (self.diff_index - 1) % len(self.difficulties)
+                else:
+                    self.menu_index = (self.menu_index - 1) % 2
+            
+            elif event.key == pygame.K_DOWN:
+                if self.vs_ai:
+                    self.diff_index = (self.diff_index + 1) % len(self.difficulties)
+                else:
+                    self.menu_index = (self.menu_index + 1) % 2
+            
+            elif event.key == pygame.K_RETURN:
+                if not self.vs_ai:
+                    if self.menu_index == 0:
+                        self.game_started = True
+                    else:
+                        self.vs_ai = True
+                else:
+                    self.ai_difficulty = self.difficulties[self.diff_index][1]
+                    self.game_started = True
 
     def handle_click(self, px, py):
         # 转换屏幕坐标到棋盘坐标
@@ -391,6 +511,18 @@ class JungleGame:
             
             while running:
                 clock.tick(30)
+                
+                # 处理游戏模式选择
+                if not self.game_started:
+                    self.draw_mode_selection()
+                    for event in pygame.event.get():
+                        if event.type == pygame.QUIT:
+                            running = False
+                        elif self.handle_mode_selection(event):
+                            running = False
+                    continue
+                
+                # 主游戏循环
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         running = False
@@ -404,6 +536,14 @@ class JungleGame:
                             self.__init__()
                         elif event.key == pygame.K_ESCAPE:  # 按ESC退出
                             running = False
+                
+                # AI移动
+                if self.vs_ai and not self.game_over and self.turn == 'blue':
+                    ai_move = self.get_ai_move()
+                    if ai_move:
+                        piece, to_row, to_col = ai_move
+                        self.move_piece(piece, to_row, to_col)
+                        self.turn = 'red'
 
                 if self.win:  # 确保窗口还存在
                     self.draw_board()
@@ -411,3 +551,60 @@ class JungleGame:
                 
         finally:
             self.cleanup()  # 确保资源被清理
+
+    def get_ai_move(self):
+        # 获取所有合法移动
+        valid_moves = []
+        for row in range(BOARD_ROWS):
+            for col in range(BOARD_COLS):
+                piece = self.board[row][col]
+                if piece and piece.team == self.turn:
+                    moves = self.get_valid_moves(piece)
+                    for move in moves:
+                        valid_moves.append((piece, move[0], move[1]))
+        
+        if not valid_moves:
+            return None
+        
+        # 改进的评估函数
+        def evaluate_move(piece, to_row, to_col):
+            score = 0
+            target = self.board[to_row][to_col]
+            
+            # 基本价值
+            if target:
+                score += target.rank * 2  # 提高吃子权重
+            else:
+                score += 1
+                
+            # 位置价值
+            if piece.rank == 12:  # 军旗
+                # 鼓励军旗向对方大本营移动
+                hq_row, hq_col = HEADQUARTER_POSITIONS['red' if piece.team == 'blue' else 'blue']
+                distance = abs(to_row - hq_row) + abs(to_col - hq_col)
+                score += 100 / (distance + 1)
+                
+            # 控制中心区域
+            center_row, center_col = BOARD_ROWS // 2, BOARD_COLS // 2
+            distance_to_center = abs(to_row - center_row) + abs(to_col - center_col)
+            score += 50 / (distance_to_center + 1)
+            
+            # 根据难度调整评估
+            if self.ai_difficulty == 'easy':
+                score *= 0.5  # 降低评估准确度
+            elif self.ai_difficulty == 'hard':
+                score *= 1.5  # 提高评估准确度
+            
+            return score
+        
+        # 选择最佳移动
+        best_score = -float('inf')
+        best_move = None
+        
+        for piece, to_row, to_col in valid_moves:
+            score = evaluate_move(piece, to_row, to_col)
+            if score > best_score:
+                best_score = score
+                best_move = (piece, to_row, to_col)
+        
+        return best_move
