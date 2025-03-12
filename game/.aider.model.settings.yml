@@ -1,0 +1,12 @@
+#https://aider.chat/docs/config/adv-model-settings.html
+
+- name: openai/QwQ-32B
+  edit_format: diff
+  weak_model_name: openai/QwQ-32B
+  use_repo_map: true
+  extra_params:
+    # max_tokens: 160000
+  use_temperature: false
+  editor_model_name: openai/QwQ-32B
+  editor_edit_format: editor-diff
+  reasoning_tag: think
