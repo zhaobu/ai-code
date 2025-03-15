@@ -15,6 +15,12 @@
 - 五子棋 (Gomoku)
 - 象棋 (Chinese Chess)
 - 数独 (Sudoku)
+- 丛林棋 (Jungle Chess)
+- Flappy Bird
+- 太空护盾 (Space Shield)
+- 猜数字 (Guess Number)
+- 井字棋 (Tic Tac Toe)
+- 坦克大战 (Tank War)
 
 ## 功能特点
 
