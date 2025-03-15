@@ -18,6 +18,7 @@ from src.bomberman.game import BombermanGame
 from src.flappybird.game import FlappyBirdGame
 from src.jungle.game import JungleGame
 from src.spaceshield.game import SpaceshieldGame
+from src.sokoban.game import SokobanGame
 from src.common.colors import *
 
 options = [
@@ -35,7 +36,8 @@ options = [
     "12. 炸弹人",
     "13. Flappy Bird",
 "14. 军棋",
-"15. 太空防御战"
+"15. 太空防御战",
+"16. 推箱子"
 ]
 
 def draw_menu(screen, selected, page=0):
@@ -69,7 +71,7 @@ def draw_menu(screen, selected, page=0):
     page_text = pygame.font.Font("C:/Windows/Fonts/msyh.ttc", 24).render(page_info, True, WHITE)
     screen.blit(page_text, (screen.get_width()//2 - page_text.get_width()//2, screen.get_height() - 50))
     
-    hint_font = pygame.font.Font("C:/Windows/Fonts/msyh.ttc", 20)
+    hint_font = pygame.font.Font("C:/Windows/Fonts/msyh.ttc", 24)
     hints = [
         "↑↓: 选择游戏",
         "←→: 翻页",
@@ -77,10 +79,11 @@ def draw_menu(screen, selected, page=0):
         "Enter: 确认",
         "Esc: 退出"
     ]
-    hint_x = screen.get_width() - 180
+    hint_x = screen.get_width() - 250  # 增加显示区域
+    hint_y = 150  # 调整起始位置
     for i, hint in enumerate(hints):
         hint_text = hint_font.render(hint, True, WHITE)
-        screen.blit(hint_text, (hint_x, 120 + i * 30))
+        screen.blit(hint_text, (hint_x, hint_y + i * 40))  # 增加行距
     
     pygame.display.flip()
 
@@ -176,9 +179,12 @@ def main():
                             game = JungleGame()
                         elif game_index == 14:
                             game = SpaceshieldGame()
+                        elif game_index == 15:
+                            game = SokobanGame()
                         game.run()
                         screen = pygame.display.set_mode((800, 600))
                         pygame.display.set_caption("游戏合集")
+                        pygame.font.init()  # 重新初始化字体系统
                     else:
                         running = False
 
